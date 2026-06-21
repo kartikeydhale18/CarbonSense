@@ -121,6 +121,9 @@ export const LogForm: React.FC = () => {
       const todayStr = new Date().toISOString().split('T')[0];
       const userRef = doc(db, 'users', user.uid);
 
+      let milestoneTriggered = false;
+      let pointsAdded = 0;
+
       // Perform a transaction to keep profile stats and log document updates consistent
       await runTransaction(db, async (transaction) => {
         const userDoc = await transaction.get(userRef);
@@ -140,7 +143,8 @@ export const LogForm: React.FC = () => {
         const newPoints = (profile.totalPoints || 0) + streakData.pointsToAdd;
         const newBadges = [...(profile.unlockedBadges || [])];
         
-        let milestoneTriggered = false;
+        pointsAdded = streakData.pointsToAdd;
+        
         // Award "Commute Champion" when total points cross 500
         if (newPoints >= 500 && !newBadges.includes('Commute Champion')) {
           newBadges.push('Commute Champion');
@@ -167,16 +171,12 @@ export const LogForm: React.FC = () => {
           lastLoggedDate: todayStr,
           unlockedBadges: newBadges,
         });
-
-        // Store result on window for triggers outside transaction scope
-        (window as any)._milestoneTriggered = milestoneTriggered;
-        (window as any)._pointsAdded = streakData.pointsToAdd;
       });
 
-      setSuccessMsg(`Log recorded successfully! You saved ${carbonSaved} kg of CO2 and earned ${(window as any)._pointsAdded || 0} points!`);
+      setSuccessMsg(`Log recorded successfully! You saved ${carbonSaved} kg of CO2 and earned ${pointsAdded} points!`);
       
       // Always trigger soft confetti, trigger high milestone confetti if unlocked Commute Champion
-      if ((window as any)._milestoneTriggered) {
+      if (milestoneTriggered) {
         triggerConfetti();
         // Additional delay confetti for wow effect
         setTimeout(triggerConfetti, 400);
@@ -195,9 +195,10 @@ export const LogForm: React.FC = () => {
       setTransportKms(0);
       setEnergyKwh(12);
       resetRoute();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMsg(err.message || 'An error occurred while saving your log.');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred while saving your log.';
+      setErrorMsg(errorMessage);
     } finally {
       setSubmitting(false);
     }

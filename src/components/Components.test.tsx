@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 
 // --- Mocks ---
 
@@ -17,7 +18,7 @@ vi.mock('firebase/firestore', () => ({
   orderBy: vi.fn().mockImplementation(() => ({})),
   limit: vi.fn().mockImplementation(() => ({})),
   getDocs: vi.fn().mockImplementation(() => Promise.resolve({
-    forEach: (cb: any) => {
+    forEach: (cb: (doc: { id: string; data: () => Record<string, unknown> }) => void) => {
       // Competitor 1 / Log 1
       cb({
         id: 'mock1',
@@ -84,12 +85,12 @@ vi.mock('../context/AuthContext', () => ({
     logout: vi.fn(),
     refreshProfile: vi.fn(),
   }),
-  AuthProvider: ({ children }: any) => <div>{children}</div>,
+  AuthProvider: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 // Mock react-leaflet to prevent JSDOM layout & canvas rendering errors
 vi.mock('react-leaflet', () => ({
-  MapContainer: ({ children }: any) => <div data-testid="map-container">{children}</div>,
+  MapContainer: ({ children }: { children: ReactNode }) => <div data-testid="map-container">{children}</div>,
   TileLayer: () => <div data-testid="tile-layer" />,
   Marker: () => <div data-testid="marker" />,
   Polyline: () => <div data-testid="polyline" />,

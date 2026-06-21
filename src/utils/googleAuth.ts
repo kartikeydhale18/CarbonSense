@@ -65,7 +65,7 @@ export class GoogleAuthService {
               resolve(accessToken);
             }
           }
-        } catch (e) {
+        } catch {
           // Cross-origin check triggers exception until the popup redirects back to redirectUri
         }
       }, 500);
