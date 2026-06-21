@@ -1,6 +1,7 @@
 import React, { useState, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Leaf, Flame, Trophy, User, LogIn, Loader } from 'lucide-react';
+import { Chatbot } from './components/Chatbot';
 
 // Lazy loading the tab components to satisfy the optimization requirement
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
@@ -147,6 +148,8 @@ const AppContent: React.FC = () => {
           </div>
         </Suspense>
       </div>
+
+      <Chatbot />
 
       <footer className="border-t border-slate-900 bg-slate-950/40 py-6 text-center text-xs text-gray-500 font-semibold uppercase tracking-wider">
         &copy; {new Date().getFullYear()} CarbonSense Platform.
