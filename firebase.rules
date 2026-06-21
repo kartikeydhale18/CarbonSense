@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Rule for user profiles
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Rule for user's daily logs subcollection
+      match /dailyLogs/{logId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Leaderboard is read-only for clients to prevent cheating or tampering with scores
+    match /leaderboard/{userId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+  }
+}
