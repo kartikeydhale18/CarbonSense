@@ -124,7 +124,7 @@ export const Leaderboard: React.FC = () => {
 
               return (
                 <div
-                  key={item.uid}
+                  key={`${item.uid || 'competitor'}-${index}`}
                   className={`flex items-center justify-between p-4 md:p-6 transition duration-150 ${
                     item.isCurrentUser ? 'bg-primary/5 border-l-4 border-l-primary' : 'hover:bg-slate-900/30'
                   }`}
