@@ -18,7 +18,9 @@ vi.mock('firebase/firestore', () => ({
   limit: vi.fn().mockImplementation(() => ({})),
   getDocs: vi.fn().mockImplementation(() => Promise.resolve({
     forEach: (cb: any) => {
+      // Competitor 1 / Log 1
       cb({
+        id: 'mock1',
         data: () => ({
           timestamp: new Date().toISOString(),
           transportKms: 10,
@@ -26,6 +28,22 @@ vi.mock('firebase/firestore', () => ({
           dietType: 'vegan',
           energyKwh: 10,
           carbonSavedKg: 2,
+          displayName: 'Sophia Green',
+          totalPoints: 1250,
+        })
+      });
+      // Competitor 2 / Log 2
+      cb({
+        id: 'mock2',
+        data: () => ({
+          timestamp: new Date().toISOString(),
+          transportKms: 20,
+          transportType: 'bicycle',
+          dietType: 'vegan',
+          energyKwh: 8,
+          carbonSavedKg: 7.4,
+          displayName: 'Emma Leaf',
+          totalPoints: 720,
         })
       });
     }

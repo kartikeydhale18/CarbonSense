@@ -16,15 +16,6 @@ export const Leaderboard: React.FC = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Pre-seeded high scores to make the leaderboard look active, competitive, and premium
-  const mockCompetitors: LeaderboardUser[] = [
-    { uid: 'mock1', displayName: 'Sophia Green', totalPoints: 1250 },
-    { uid: 'mock2', displayName: 'Liam Woods', totalPoints: 940 },
-    { uid: 'mock3', displayName: 'Emma Leaf', totalPoints: 720 },
-    { uid: 'mock4', displayName: 'Oliver Root', totalPoints: 480 },
-    { uid: 'mock5', displayName: 'Mia Solar', totalPoints: 310 },
-  ];
-
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
@@ -33,7 +24,7 @@ export const Leaderboard: React.FC = () => {
         const q = query(colRef, orderBy('totalPoints', 'desc'), limit(10));
         const querySnapshot = await getDocs(q);
         
-        let dbUsers: LeaderboardUser[] = [];
+        const dbUsers: LeaderboardUser[] = [];
         querySnapshot.forEach((doc) => {
           dbUsers.push({
             uid: doc.id,
@@ -41,7 +32,6 @@ export const Leaderboard: React.FC = () => {
           } as LeaderboardUser);
         });
 
-        // Combine DB results (if any exist) with mock competitors, filter duplicates, and sort
         const currentLiveUser: LeaderboardUser | null = userProfile ? {
           uid: user?.uid || 'current',
           displayName: userProfile.displayName || 'You',
@@ -49,16 +39,9 @@ export const Leaderboard: React.FC = () => {
           isCurrentUser: true,
         } : null;
 
-        let mergedList = [...dbUsers];
-        
-        // Add mock users to ensure leaderboard is always full of participants
-        mockCompetitors.forEach(mock => {
-          if (!mergedList.some(u => u.displayName === mock.displayName)) {
-            mergedList.push(mock);
-          }
-        });
+        const mergedList = [...dbUsers];
 
-        // Add current user if not already present
+        // Add current user if not already present in the Firestore rankings
         if (currentLiveUser && !mergedList.some(u => u.uid === currentLiveUser.uid)) {
           mergedList.push(currentLiveUser);
         }
@@ -68,15 +51,14 @@ export const Leaderboard: React.FC = () => {
         setLeaderboard(mergedList);
       } catch (error) {
         console.error("Error reading leaderboard (could be due to strict rules):", error);
-        // Safely fall back to mock data + current user on permission block
+        // Fallback to show only current user on query failure
         const currentLiveUser: LeaderboardUser | null = userProfile ? {
           uid: user?.uid || 'current',
           displayName: userProfile.displayName || 'You (Local)',
           totalPoints: userProfile.totalPoints || 0,
           isCurrentUser: true,
         } : null;
-        const mergedList = currentLiveUser ? [currentLiveUser, ...mockCompetitors] : [...mockCompetitors];
-        mergedList.sort((a, b) => b.totalPoints - a.totalPoints);
+        const mergedList = currentLiveUser ? [currentLiveUser] : [];
         setLeaderboard(mergedList);
       } finally {
         setLoading(false);
@@ -112,7 +94,7 @@ export const Leaderboard: React.FC = () => {
             <Loader className="w-8 h-8 animate-spin text-primary" />
             <p>Loading rankings...</p>
           </div>
-        ) : (
+        ) : leaderboard.length > 0 ? (
           <div className="divide-y divide-slate-800">
             {leaderboard.map((item, index) => {
               const rank = index + 1;
@@ -164,6 +146,12 @@ export const Leaderboard: React.FC = () => {
                 </div>
               );
             })}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400 space-y-2">
+            <Trophy className="w-12 h-12 text-slate-700" />
+            <p className="text-sm font-semibold text-white">No Rankings Available</p>
+            <p className="text-xs text-gray-500">Sign in and earn points to see yourself here!</p>
           </div>
         )}
       </div>
