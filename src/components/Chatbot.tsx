@@ -19,7 +19,7 @@ export const Chatbot: React.FC = () => {
   ]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
@@ -62,7 +62,7 @@ export const Chatbot: React.FC = () => {
 
     try {
       const ai = new GoogleGenAI({ apiKey });
-      
+
       const systemInstruction = `
         You are CarbonBot, a helpful AI eco-assistant integrated into CarbonSense.
         Answer user questions specifically related to carbon footprints, environment, energy saving, recycling, and sustainable living.
@@ -70,18 +70,21 @@ export const Chatbot: React.FC = () => {
       `;
 
       // Build chat history context from last few messages
-      const historyContext = messages.slice(-5).map(m => `${m.sender === 'user' ? 'User' : 'CarbonBot'}: ${m.text}`).join('\n');
+      const historyContext = messages
+        .slice(-5)
+        .map((m) => `${m.sender === 'user' ? 'User' : 'CarbonBot'}: ${m.text}`)
+        .join('\n');
 
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: `${historyContext}\nUser: ${inputText}`,
         config: {
           systemInstruction,
-        }
+        },
       });
 
       const botText = response.text || 'I am sorry, I had trouble processing that request.';
-      
+
       setMessages((prev) => [
         ...prev,
         {
@@ -91,7 +94,7 @@ export const Chatbot: React.FC = () => {
         },
       ]);
     } catch (error) {
-      console.error("Chatbot query error:", error);
+      console.error('Chatbot query error:', error);
       setMessages((prev) => [
         ...prev,
         {
@@ -146,10 +149,7 @@ export const Chatbot: React.FC = () => {
             {messages.map((msg, index) => {
               const isBot = msg.sender === 'bot';
               return (
-                <div
-                  key={index}
-                  className={`flex ${isBot ? 'justify-start' : 'justify-end'}`}
-                >
+                <div key={index} className={`flex ${isBot ? 'justify-start' : 'justify-end'}`}>
                   <div
                     className={`max-w-[85%] rounded-2xl p-3 text-xs leading-relaxed ${
                       isBot
@@ -169,7 +169,7 @@ export const Chatbot: React.FC = () => {
                 </div>
               );
             })}
-            
+
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-slate-900 border border-slate-800 text-slate-400 rounded-2xl rounded-tl-none p-3 text-xs flex items-center space-x-2">
@@ -178,12 +178,15 @@ export const Chatbot: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input Form */}
-          <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-800 bg-slate-900/50 flex items-center space-x-2">
+          <form
+            onSubmit={handleSendMessage}
+            className="p-3 border-t border-slate-800 bg-slate-900/50 flex items-center space-x-2"
+          >
             <input
               type="text"
               value={inputText}

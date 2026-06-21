@@ -3,7 +3,16 @@ import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { useAuth } from '../context/AuthContext';
 import { exportLogsToSheets } from '../services/googleSheetsService';
-import { User, Shield, Flame, Award, Download, Loader, CheckCircle, ExternalLink } from 'lucide-react';
+import {
+  User,
+  Shield,
+  Flame,
+  Award,
+  Download,
+  Loader,
+  CheckCircle,
+  ExternalLink,
+} from 'lucide-react';
 
 interface DailyLogData {
   timestamp: string;
@@ -18,7 +27,9 @@ export const Profile: React.FC = () => {
   const { user, userProfile, logout } = useAuth();
   const [logs, setLogs] = useState<DailyLogData[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
-  const [exportStatus, setExportStatus] = useState<'idle' | 'exporting' | 'success' | 'error'>('idle');
+  const [exportStatus, setExportStatus] = useState<'idle' | 'exporting' | 'success' | 'error'>(
+    'idle',
+  );
   const [sheetUrl, setSheetUrl] = useState<string>('');
 
   useEffect(() => {
@@ -29,14 +40,14 @@ export const Profile: React.FC = () => {
         const logsRef = collection(db, 'users', user.uid, 'dailyLogs');
         const q = query(logsRef, orderBy('timestamp', 'desc'));
         const querySnapshot = await getDocs(q);
-        
+
         const fetchedLogs: DailyLogData[] = [];
         querySnapshot.forEach((doc) => {
           fetchedLogs.push(doc.data() as DailyLogData);
         });
         setLogs(fetchedLogs);
       } catch (error) {
-        console.error("Error fetching logs for export:", error);
+        console.error('Error fetching logs for export:', error);
       } finally {
         setLoadingLogs(false);
       }
@@ -47,7 +58,7 @@ export const Profile: React.FC = () => {
 
   const handleExport = async () => {
     if (logs.length === 0) {
-      alert("You need to submit at least one daily log before exporting.");
+      alert('You need to submit at least one daily log before exporting.');
       return;
     }
     setExportStatus('exporting');
@@ -56,7 +67,7 @@ export const Profile: React.FC = () => {
       setSheetUrl(url);
       setExportStatus('success');
     } catch (error) {
-      console.error("Export to Google Sheets failed:", error);
+      console.error('Export to Google Sheets failed:', error);
       setExportStatus('error');
       setTimeout(() => setExportStatus('idle'), 5000);
     }
@@ -80,11 +91,15 @@ export const Profile: React.FC = () => {
       title: 'Streak Warrior',
       desc: 'Reach a streak of 3 consecutive daily logs.',
       reqPoints: 100, // mock rule
-    }
+    },
   ];
 
   return (
-    <main id="main-content" className="flex-1 p-6 md:p-10 max-w-4xl mx-auto w-full text-left" tabIndex={-1}>
+    <main
+      id="main-content"
+      className="flex-1 p-6 md:p-10 max-w-4xl mx-auto w-full text-left"
+      tabIndex={-1}
+    >
       <header className="mb-8">
         <h1 className="text-3xl font-extrabold text-white tracking-tight">Your Eco Profile</h1>
         <p className="text-gray-400 mt-2 text-base">
@@ -99,7 +114,7 @@ export const Profile: React.FC = () => {
             <div className="w-20 h-20 bg-slate-900 border border-slate-800 rounded-full mx-auto flex items-center justify-center text-gray-400 mb-4">
               <User className="w-10 h-10" />
             </div>
-            
+
             <h2 className="text-xl font-bold text-white leading-tight">
               {userProfile?.displayName || user?.displayName || 'Eco Warrior'}
             </h2>
@@ -109,14 +124,18 @@ export const Profile: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4 border-t border-slate-800 pt-6">
               <div>
-                <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Current Streak</span>
+                <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Current Streak
+                </span>
                 <span className="text-2xl font-bold text-white flex items-center justify-center mt-1">
                   <Flame className="w-5 h-5 text-orange-400 mr-1" />
                   {userProfile?.currentStreak || 0}
                 </span>
               </div>
               <div>
-                <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Highest Streak</span>
+                <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Highest Streak
+                </span>
                 <span className="text-2xl font-bold text-white flex items-center justify-center mt-1">
                   <Shield className="w-5 h-5 text-emerald-400 mr-1" />
                   {userProfile?.highestStreak || 0}
@@ -136,9 +155,10 @@ export const Profile: React.FC = () => {
           <div className="bg-dark-card border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md">
             <h3 className="text-base font-bold text-white mb-3">Backup logs</h3>
             <p className="text-xs text-gray-400 leading-relaxed mb-6">
-              Export all historic carbon savings log records directly into a clean, new Google Sheet spreadsheet via Google OAuth 2.0.
+              Export all historic carbon savings log records directly into a clean, new Google Sheet
+              spreadsheet via Google OAuth 2.0.
             </p>
-            
+
             <button
               onClick={handleExport}
               disabled={exportStatus === 'exporting' || loadingLogs}
@@ -175,14 +195,22 @@ export const Profile: React.FC = () => {
               </a>
             )}
             {exportStatus === 'error' && (
-              <p className="text-rose-400 text-xs mt-3 font-semibold text-center">Export failed. Try again.</p>
+              <p className="text-rose-400 text-xs mt-3 font-semibold text-center">
+                Export failed. Try again.
+              </p>
             )}
           </div>
         </section>
 
         {/* Badges System */}
-        <section aria-labelledby="badges-section-title" className="md:col-span-2 bg-dark-card border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl backdrop-blur-md">
-          <h2 id="badges-section-title" className="text-xl md:text-2xl font-bold text-white mb-6 flex items-center space-x-2">
+        <section
+          aria-labelledby="badges-section-title"
+          className="md:col-span-2 bg-dark-card border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl backdrop-blur-md"
+        >
+          <h2
+            id="badges-section-title"
+            className="text-xl md:text-2xl font-bold text-white mb-6 flex items-center space-x-2"
+          >
             <Award className="w-6 h-6 text-primary animate-bounce" />
             <span>Badges & Achievements</span>
           </h2>
@@ -190,11 +218,14 @@ export const Profile: React.FC = () => {
           <div className="space-y-6">
             {badgeMetadata.map((badge) => {
               // Determine if badge is unlocked
-              const isUnlocked = 
-                badge.id === 'Commute Champion' ? (userProfile?.totalPoints || 0) >= 500 :
-                badge.id === 'Eco Novice' ? logs.length > 0 :
-                badge.id === 'Streak Warrior' ? (userProfile?.highestStreak || 0) >= 3 :
-                false;
+              const isUnlocked =
+                badge.id === 'Commute Champion'
+                  ? (userProfile?.totalPoints || 0) >= 500
+                  : badge.id === 'Eco Novice'
+                    ? logs.length > 0
+                    : badge.id === 'Streak Warrior'
+                      ? (userProfile?.highestStreak || 0) >= 3
+                      : false;
 
               return (
                 <div
@@ -207,23 +238,33 @@ export const Profile: React.FC = () => {
                 >
                   <div
                     className={`p-3 rounded-xl flex-shrink-0 ${
-                      isUnlocked ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-900 text-gray-600'
+                      isUnlocked
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'bg-slate-900 text-gray-600'
                     }`}
                   >
                     <Award className="w-7 h-7" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <h3 className={`text-base font-bold ${isUnlocked ? 'text-white' : 'text-slate-500'}`}>
+                      <h3
+                        className={`text-base font-bold ${isUnlocked ? 'text-white' : 'text-slate-500'}`}
+                      >
                         {badge.title}
                       </h3>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        isUnlocked ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-900 text-gray-600'
-                      }`}>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                          isUnlocked
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-slate-900 text-gray-600'
+                        }`}
+                      >
                         {isUnlocked ? 'Unlocked' : 'Locked'}
                       </span>
                     </div>
-                    <p className={`text-xs mt-1 leading-relaxed ${isUnlocked ? 'text-gray-400' : 'text-slate-600'}`}>
+                    <p
+                      className={`text-xs mt-1 leading-relaxed ${isUnlocked ? 'text-gray-400' : 'text-slate-600'}`}
+                    >
                       {badge.desc}
                     </p>
                   </div>

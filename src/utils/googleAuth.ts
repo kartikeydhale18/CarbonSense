@@ -2,7 +2,7 @@ const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/spreadsheets',
-  'https://www.googleapis.com/auth/drive.file'
+  'https://www.googleapis.com/auth/drive.file',
 ].join(' ');
 
 /**
@@ -25,7 +25,8 @@ export class GoogleAuthService {
 
     return new Promise((resolve, reject) => {
       const redirectUri = window.location.origin;
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      const authUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${encodeURIComponent(CLIENT_ID)}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&response_type=token` +
@@ -59,7 +60,7 @@ export class GoogleAuthService {
               const expireTime = Date.now() + parseInt(expiresIn || '3600') * 1000;
               localStorage.setItem(this.TOKEN_KEY, accessToken);
               localStorage.setItem(this.EXPIRE_KEY, expireTime.toString());
-              
+
               popup.close();
               clearInterval(interval);
               resolve(accessToken);

@@ -11,7 +11,10 @@ const Profile = React.lazy(() => import('./components/Profile'));
 
 type Tab = 'dashboard' | 'log' | 'leaderboard' | 'profile';
 
-const Navigation: React.FC<{ activeTab: Tab; setActiveTab: (tab: Tab) => void }> = ({ activeTab, setActiveTab }) => {
+const Navigation: React.FC<{ activeTab: Tab; setActiveTab: (tab: Tab) => void }> = ({
+  activeTab,
+  setActiveTab,
+}) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Leaf },
     { id: 'log', label: 'Daily Log', icon: Flame },
@@ -20,9 +23,11 @@ const Navigation: React.FC<{ activeTab: Tab; setActiveTab: (tab: Tab) => void }>
   ];
 
   return (
-    <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4" aria-label="Main Navigation">
+    <nav
+      className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4"
+      aria-label="Main Navigation"
+    >
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        
         {/* Logo Section */}
         <div className="flex items-center space-x-2">
           <div className="p-2 bg-primary/10 rounded-xl text-primary">
@@ -57,7 +62,6 @@ const Navigation: React.FC<{ activeTab: Tab; setActiveTab: (tab: Tab) => void }>
             );
           })}
         </ul>
-
       </div>
     </nav>
   );
@@ -86,7 +90,6 @@ const AppContent: React.FC = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        
         {/* Glow ambient background elements */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -100,7 +103,8 @@ const AppContent: React.FC = () => {
               Carbon<span className="text-primary">Sense</span>
             </h1>
             <p className="text-gray-400 text-sm md:text-base max-w-sm mx-auto leading-relaxed">
-              Track your daily habits, visualize emissions savings, unlock achievements, and earn rewards through gamified actions.
+              Track your daily habits, visualize emissions savings, unlock achievements, and earn
+              rewards through gamified actions.
             </p>
           </header>
 
@@ -119,7 +123,7 @@ const AppContent: React.FC = () => {
               <span>Continue with Google</span>
             </button>
           </section>
-          
+
           <footer className="text-[11px] text-gray-500 font-semibold tracking-wider uppercase">
             &copy; {new Date().getFullYear()} CarbonSense. All rights reserved.
           </footer>
@@ -132,7 +136,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
-      
+
       <div className="flex-1 flex flex-col">
         <Suspense fallback={<LoadingSpinner />}>
           <div

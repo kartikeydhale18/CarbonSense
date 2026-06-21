@@ -38,7 +38,7 @@ const MapClickHandler: React.FC<{
 
 export const LogForm: React.FC = () => {
   const { user, refreshProfile } = useAuth();
-  
+
   // Form states
   const [transportKms, setTransportKms] = useState<number>(0);
   const [transportType, setTransportType] = useState<string>('petrol-car');
@@ -48,7 +48,9 @@ export const LogForm: React.FC = () => {
   // Map coordinates states
   const [startPoint, setStartPoint] = useState<L.LatLng | null>(null);
   const [endPoint, setEndPoint] = useState<L.LatLng | null>(null);
-  const [mapHelperText, setMapHelperText] = useState('Click on the map to set starting point (Marker A)');
+  const [mapHelperText, setMapHelperText] = useState(
+    'Click on the map to set starting point (Marker A)',
+  );
 
   // Submission & Alert States
   const [submitting, setSubmitting] = useState(false);
@@ -57,7 +59,12 @@ export const LogForm: React.FC = () => {
   const [carbonPreview, setCarbonPreview] = useState<number | null>(null);
 
   // Haversine formula to compute distance
-  const calculateGeodesicDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const calculateGeodesicDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number => {
     const R = 6371; // Earth radius in km
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -77,7 +84,12 @@ export const LogForm: React.FC = () => {
       setMapHelperText('Now click to set destination point (Marker B)');
     } else if (!endPoint) {
       setEndPoint(latlng);
-      const distance = calculateGeodesicDistance(startPoint.lat, startPoint.lng, latlng.lat, latlng.lng);
+      const distance = calculateGeodesicDistance(
+        startPoint.lat,
+        startPoint.lng,
+        latlng.lat,
+        latlng.lng,
+      );
       setTransportKms(distance);
       setMapHelperText('Route configured! Click Reset Route to select a new one.');
     }
@@ -128,7 +140,7 @@ export const LogForm: React.FC = () => {
       await runTransaction(db, async (transaction) => {
         const userDoc = await transaction.get(userRef);
         if (!userDoc.exists()) {
-          throw new Error("User profile not found.");
+          throw new Error('User profile not found.');
         }
 
         const profile = userDoc.data();
@@ -137,14 +149,14 @@ export const LogForm: React.FC = () => {
           todayStr,
           profile.currentStreak || 0,
           profile.highestStreak || 0,
-          carbonSaved
+          carbonSaved,
         );
 
         const newPoints = (profile.totalPoints || 0) + streakData.pointsToAdd;
         const newBadges = [...(profile.unlockedBadges || [])];
-        
+
         pointsAdded = streakData.pointsToAdd;
-        
+
         // Award "Commute Champion" when total points cross 500
         if (newPoints >= 500 && !newBadges.includes('Commute Champion')) {
           newBadges.push('Commute Champion');
@@ -173,14 +185,16 @@ export const LogForm: React.FC = () => {
         });
       });
 
-      setSuccessMsg(`Log recorded successfully! You saved ${carbonSaved} kg of CO2 and earned ${pointsAdded} points!`);
-      
+      setSuccessMsg(
+        `Log recorded successfully! You saved ${carbonSaved} kg of CO2 and earned ${pointsAdded} points!`,
+      );
+
       // Always trigger soft confetti, trigger high milestone confetti if unlocked Commute Champion
       if (milestoneTriggered) {
         triggerConfetti();
         // Additional delay confetti for wow effect
         setTimeout(triggerConfetti, 400);
-        setSuccessMsg(prev => prev + " 🎉 Milestone unlocked: You are now a Commute Champion!");
+        setSuccessMsg((prev) => prev + ' 🎉 Milestone unlocked: You are now a Commute Champion!');
       } else {
         confetti({
           particleCount: 50,
@@ -190,14 +204,15 @@ export const LogForm: React.FC = () => {
       }
 
       await refreshProfile();
-      
+
       // Reset form variables
       setTransportKms(0);
       setEnergyKwh(12);
       resetRoute();
     } catch (err: unknown) {
       console.error(err);
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred while saving your log.';
+      const errorMessage =
+        err instanceof Error ? err.message : 'An error occurred while saving your log.';
       setErrorMsg(errorMessage);
     } finally {
       setSubmitting(false);
@@ -216,7 +231,11 @@ export const LogForm: React.FC = () => {
   };
 
   return (
-    <main id="main-content" className="flex-1 p-6 md:p-10 max-w-4xl mx-auto w-full text-left" tabIndex={-1}>
+    <main
+      id="main-content"
+      className="flex-1 p-6 md:p-10 max-w-4xl mx-auto w-full text-left"
+      tabIndex={-1}
+    >
       <header className="mb-8">
         <h1 className="text-3xl font-extrabold text-white tracking-tight">Record Daily Metrics</h1>
         <p className="text-gray-400 mt-2 text-base">
@@ -225,21 +244,29 @@ export const LogForm: React.FC = () => {
       </header>
 
       {errorMsg && (
-        <div role="alert" className="mb-6 p-4 bg-rose-950/20 border border-rose-900/50 rounded-xl text-rose-300 flex items-center space-x-3">
+        <div
+          role="alert"
+          className="mb-6 p-4 bg-rose-950/20 border border-rose-900/50 rounded-xl text-rose-300 flex items-center space-x-3"
+        >
           <ShieldAlert className="w-5 h-5 flex-shrink-0" />
           <span className="text-sm font-medium">{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div role="status" className="mb-6 p-4 bg-emerald-950/20 border border-emerald-900/50 rounded-xl text-emerald-300 flex items-center space-x-3">
+        <div
+          role="status"
+          className="mb-6 p-4 bg-emerald-950/20 border border-emerald-900/50 rounded-xl text-emerald-300 flex items-center space-x-3"
+        >
           <CheckCircle className="w-5 h-5 flex-shrink-0 animate-bounce" />
           <span className="text-sm font-semibold">{successMsg}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8 bg-dark-card border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl backdrop-blur-md">
-        
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-8 bg-dark-card border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl backdrop-blur-md"
+      >
         {/* Section 1: Transport Route Planning */}
         <fieldset className="space-y-6">
           <legend className="text-lg font-bold text-white flex items-center space-x-2">
@@ -255,7 +282,10 @@ export const LogForm: React.FC = () => {
               <select
                 id="transport-type"
                 value={transportType}
-                onChange={(e) => { setTransportType(e.target.value); handlePreviewCalculation(); }}
+                onChange={(e) => {
+                  setTransportType(e.target.value);
+                  handlePreviewCalculation();
+                }}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="petrol-car">Petrol Car (Standard)</option>
@@ -269,7 +299,10 @@ export const LogForm: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="transport-distance" className="block text-sm font-semibold text-gray-300">
+              <label
+                htmlFor="transport-distance"
+                className="block text-sm font-semibold text-gray-300"
+              >
                 Travel Distance (km)
               </label>
               <input
@@ -278,7 +311,10 @@ export const LogForm: React.FC = () => {
                 min="0"
                 step="0.1"
                 value={transportKms}
-                onChange={(e) => { setTransportKms(parseFloat(e.target.value) || 0); handlePreviewCalculation(); }}
+                onChange={(e) => {
+                  setTransportKms(parseFloat(e.target.value) || 0);
+                  handlePreviewCalculation();
+                }}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
@@ -291,23 +327,24 @@ export const LogForm: React.FC = () => {
               <MapPin className="w-4 h-4 text-emerald-400" />
               <span>Interactive Map Route Picker (Visual calculation helper)</span>
             </span>
-            
+
             <div className="relative rounded-xl overflow-hidden border border-slate-800">
-              <MapContainer center={[19.0760, 72.8777]} zoom={11} className="w-full h-80 z-0">
+              <MapContainer center={[19.076, 72.8777]} zoom={11} className="w-full h-80 z-0">
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <MapClickHandler onMapClick={handleMapClick} />
-                
-                {startPoint && (
-                  <Marker position={startPoint} icon={startIcon} />
-                )}
-                {endPoint && (
-                  <Marker position={endPoint} icon={endIcon} />
-                )}
+
+                {startPoint && <Marker position={startPoint} icon={startIcon} />}
+                {endPoint && <Marker position={endPoint} icon={endIcon} />}
                 {startPoint && endPoint && (
-                  <Polyline positions={[startPoint, endPoint]} color="#10b981" weight={4} dashArray="5, 10" />
+                  <Polyline
+                    positions={[startPoint, endPoint]}
+                    color="#10b981"
+                    weight={4}
+                    dashArray="5, 10"
+                  />
                 )}
               </MapContainer>
             </div>
@@ -345,7 +382,10 @@ export const LogForm: React.FC = () => {
               <select
                 id="diet-type"
                 value={dietType}
-                onChange={(e) => { setDietType(e.target.value); handlePreviewCalculation(); }}
+                onChange={(e) => {
+                  setDietType(e.target.value);
+                  handlePreviewCalculation();
+                }}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="heavy-meat">High Meat Consumption</option>
@@ -365,7 +405,10 @@ export const LogForm: React.FC = () => {
                 min="0"
                 step="0.5"
                 value={energyKwh}
-                onChange={(e) => { setEnergyKwh(parseFloat(e.target.value) || 0); handlePreviewCalculation(); }}
+                onChange={(e) => {
+                  setEnergyKwh(parseFloat(e.target.value) || 0);
+                  handlePreviewCalculation();
+                }}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
@@ -380,9 +423,14 @@ export const LogForm: React.FC = () => {
               <Leaf className="w-6 h-6" />
             </div>
             <div>
-              <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Live Preview Savings</span>
+              <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Live Preview Savings
+              </span>
               <span className="text-xl font-bold text-white">
-                {carbonPreview !== null ? carbonPreview : calculateCarbonSaved({ transportKms, transportType, dietType, energyKwh })} kg CO2
+                {carbonPreview !== null
+                  ? carbonPreview
+                  : calculateCarbonSaved({ transportKms, transportType, dietType, energyKwh })}{' '}
+                kg CO2
               </span>
             </div>
           </div>
@@ -395,7 +443,6 @@ export const LogForm: React.FC = () => {
             {submitting ? 'Logging...' : 'Submit Log Entry'}
           </button>
         </div>
-
       </form>
     </main>
   );

@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const docRef = doc(db, 'users', uid);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         setUserProfile(docSnap.data() as UserProfile);
       } else {
@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserProfile(initialProfile);
       }
     } catch (error) {
-      console.error("Error fetching/initializing user profile:", error);
+      console.error('Error fetching/initializing user profile:', error);
     }
   };
 
@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error('Login failed:', error);
       setLoading(false);
     }
   };
@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await signOut(auth);
       setUserProfile(null);
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout failed:', error);
     } finally {
       setLoading(false);
     }

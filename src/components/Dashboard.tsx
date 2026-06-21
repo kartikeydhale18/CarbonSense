@@ -39,7 +39,7 @@ export const Dashboard: React.FC = () => {
         const logsRef = collection(db, 'users', user.uid, 'dailyLogs');
         const q = query(logsRef, orderBy('timestamp', 'desc'));
         const querySnapshot = await getDocs(q);
-        
+
         const fetchedLogs: LogItem[] = [];
         querySnapshot.forEach((doc) => {
           fetchedLogs.push(doc.data() as LogItem);
@@ -55,12 +55,12 @@ export const Dashboard: React.FC = () => {
         } else {
           // If no logs, load a generic recommendation
           setGeminiTip({
-            tip: "Log your first daily emissions entry to receive personalized, AI-driven action plans!",
+            tip: 'Log your first daily emissions entry to receive personalized, AI-driven action plans!',
             estimatedSavingsKg: 1.0,
           });
         }
       } catch (error) {
-        console.error("Error loading dashboard data:", error);
+        console.error('Error loading dashboard data:', error);
       } finally {
         setLoadingLogs(false);
         setLoadingTip(false);
@@ -82,7 +82,7 @@ export const Dashboard: React.FC = () => {
       setSyncStatus('success');
       setTimeout(() => setSyncStatus('idle'), 5000);
     } catch (error) {
-      console.error("Calendar sync failed:", error);
+      console.error('Calendar sync failed:', error);
       setSyncStatus('error');
       setTimeout(() => setSyncStatus('idle'), 5000);
     }
@@ -97,19 +97,28 @@ export const Dashboard: React.FC = () => {
     // Standard baselines vs choices to visualize what savings come from where
     logs.forEach((log) => {
       // transport
-      const transportFactor = log.transportType === 'bicycle' || log.transportType === 'walking' ? 0 
-        : log.transportType === 'electric-car' ? 0.05
-        : log.transportType === 'bus' ? 0.08
-        : log.transportType === 'train' ? 0.04
-        : 0.18;
-      const transportSaved = (0.20 - transportFactor) * log.transportKms;
+      const transportFactor =
+        log.transportType === 'bicycle' || log.transportType === 'walking'
+          ? 0
+          : log.transportType === 'electric-car'
+            ? 0.05
+            : log.transportType === 'bus'
+              ? 0.08
+              : log.transportType === 'train'
+                ? 0.04
+                : 0.18;
+      const transportSaved = (0.2 - transportFactor) * log.transportKms;
       transportTotal += Math.max(0, transportSaved);
 
       // diet
-      const dietFactor = log.dietType === 'vegan' ? 0.9 
-        : log.dietType === 'vegetarian' ? 1.3 
-        : log.dietType === 'low-meat' ? 1.7 
-        : 2.5;
+      const dietFactor =
+        log.dietType === 'vegan'
+          ? 0.9
+          : log.dietType === 'vegetarian'
+            ? 1.3
+            : log.dietType === 'low-meat'
+              ? 1.7
+              : 2.5;
       dietTotal += Math.max(0, 2.5 - dietFactor);
 
       // energy
@@ -128,10 +137,18 @@ export const Dashboard: React.FC = () => {
   const totalCarbonSaved = logs.reduce((sum, log) => sum + log.carbonSavedKg, 0);
 
   return (
-    <main id="main-content" className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full text-left" tabIndex={-1}>
+    <main
+      id="main-content"
+      className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full text-left"
+      tabIndex={-1}
+    >
       <header className="mb-8">
         <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-          Welcome back, <span className="text-primary">{userProfile?.displayName || user?.displayName || 'Eco Hero'}</span>!
+          Welcome back,{' '}
+          <span className="text-primary">
+            {userProfile?.displayName || user?.displayName || 'Eco Hero'}
+          </span>
+          !
         </h1>
         <p className="text-gray-400 mt-2 text-base md:text-lg">
           Track and reduce your daily environmental footprint using real-time insights.
@@ -139,14 +156,22 @@ export const Dashboard: React.FC = () => {
       </header>
 
       {/* Stats Cards Section */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" aria-label="Overview stats">
+      <section
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+        aria-label="Overview stats"
+      >
         <article className="bg-dark-card border border-slate-800 rounded-2xl p-6 flex items-center space-x-4 shadow-xl backdrop-blur-md">
           <div className="p-3 bg-emerald-500/10 rounded-xl text-primary">
             <Leaf className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Carbon Saved</h2>
-            <p className="text-3xl font-bold text-white mt-1">{totalCarbonSaved.toFixed(1)} <span className="text-lg font-medium text-emerald-500">kg</span></p>
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+              Total Carbon Saved
+            </h2>
+            <p className="text-3xl font-bold text-white mt-1">
+              {totalCarbonSaved.toFixed(1)}{' '}
+              <span className="text-lg font-medium text-emerald-500">kg</span>
+            </p>
           </div>
         </article>
 
@@ -155,8 +180,13 @@ export const Dashboard: React.FC = () => {
             <Flame className="w-8 h-8 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Current Streak</h2>
-            <p className="text-3xl font-bold text-white mt-1">{userProfile?.currentStreak || 0} <span className="text-lg font-medium text-orange-400">Days</span></p>
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+              Current Streak
+            </h2>
+            <p className="text-3xl font-bold text-white mt-1">
+              {userProfile?.currentStreak || 0}{' '}
+              <span className="text-lg font-medium text-orange-400">Days</span>
+            </p>
           </div>
         </article>
 
@@ -165,23 +195,37 @@ export const Dashboard: React.FC = () => {
             <Award className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Eco Points Earned</h2>
-            <p className="text-3xl font-bold text-white mt-1">{userProfile?.totalPoints || 0} <span className="text-lg font-medium text-accent">pts</span></p>
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+              Eco Points Earned
+            </h2>
+            <p className="text-3xl font-bold text-white mt-1">
+              {userProfile?.totalPoints || 0}{' '}
+              <span className="text-lg font-medium text-accent">pts</span>
+            </p>
           </div>
         </article>
       </section>
 
       {/* Main Grid: AI Insights & Data Visualizations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
         {/* Gemini Tips Section */}
-        <section aria-labelledby="ai-recommendations-title" className="bg-dark-card border border-slate-800 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-xl backdrop-blur-md">
+        <section
+          aria-labelledby="ai-recommendations-title"
+          className="bg-dark-card border border-slate-800 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-xl backdrop-blur-md"
+        >
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <span className="bg-primary/20 text-primary text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">AI Powered</span>
-              <h2 id="ai-recommendations-title" className="text-xl md:text-2xl font-bold text-white">Daily Eco-Challenge</h2>
+              <span className="bg-primary/20 text-primary text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                AI Powered
+              </span>
+              <h2
+                id="ai-recommendations-title"
+                className="text-xl md:text-2xl font-bold text-white"
+              >
+                Daily Eco-Challenge
+              </h2>
             </div>
-            
+
             {loadingTip ? (
               <div className="flex flex-col items-center justify-center py-12 text-gray-400 space-y-2">
                 <Loader className="w-8 h-8 animate-spin text-primary" />
@@ -193,8 +237,12 @@ export const Dashboard: React.FC = () => {
                   "{geminiTip.tip}"
                 </blockquote>
                 <div className="p-4 bg-emerald-950/20 border border-emerald-900/50 rounded-xl flex items-center justify-between">
-                  <span className="text-sm text-emerald-400 font-medium">Estimated savings if completed:</span>
-                  <span className="text-lg font-bold text-emerald-300">+{geminiTip.estimatedSavingsKg} kg CO2</span>
+                  <span className="text-sm text-emerald-400 font-medium">
+                    Estimated savings if completed:
+                  </span>
+                  <span className="text-lg font-bold text-emerald-300">
+                    +{geminiTip.estimatedSavingsKg} kg CO2
+                  </span>
                 </div>
               </div>
             ) : (
@@ -243,17 +291,25 @@ export const Dashboard: React.FC = () => {
         </section>
 
         {/* Visualizations Section */}
-        <section aria-labelledby="visualizations-title" className="bg-dark-card border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl backdrop-blur-md flex flex-col justify-between">
+        <section
+          aria-labelledby="visualizations-title"
+          className="bg-dark-card border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl backdrop-blur-md flex flex-col justify-between"
+        >
           <div>
-            <h2 id="visualizations-title" className="text-xl md:text-2xl font-bold text-white mb-6">Historical Emission Savings</h2>
-            
+            <h2 id="visualizations-title" className="text-xl md:text-2xl font-bold text-white mb-6">
+              Historical Emission Savings
+            </h2>
+
             {loadingLogs ? (
               <div className="flex flex-col items-center justify-center py-16 text-gray-400 space-y-2">
                 <Loader className="w-8 h-8 animate-spin text-primary" />
                 <p>Loading charts...</p>
               </div>
             ) : logs.length > 0 ? (
-              <div className="w-full overflow-hidden flex items-center justify-center" style={{ minHeight: '300px' }}>
+              <div
+                className="w-full overflow-hidden flex items-center justify-center"
+                style={{ minHeight: '300px' }}
+              >
                 <Chart
                   chartType="PieChart"
                   data={chartData}
@@ -263,7 +319,7 @@ export const Dashboard: React.FC = () => {
                     backgroundColor: 'transparent',
                     legend: {
                       position: 'bottom',
-                      textStyle: { color: '#9ca3af', fontSize: 13 }
+                      textStyle: { color: '#9ca3af', fontSize: 13 },
                     },
                     pieSliceBorderColor: 'transparent',
                     slices: {
@@ -281,13 +337,13 @@ export const Dashboard: React.FC = () => {
                 <Leaf className="w-12 h-12 text-slate-700" />
                 <h3 className="text-white font-semibold">No Data Visualizations Yet</h3>
                 <p className="text-gray-400 text-sm max-w-sm">
-                  Log your daily transport, diet, and energy metrics to populate your carbon savings pie chart.
+                  Log your daily transport, diet, and energy metrics to populate your carbon savings
+                  pie chart.
                 </p>
               </div>
             )}
           </div>
         </section>
-
       </div>
     </main>
   );

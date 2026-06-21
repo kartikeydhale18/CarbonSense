@@ -8,7 +8,7 @@ export interface GeminiTip {
 /**
  * Service to generate personalized eco-action tips using Gemini models.
  * Uses the latest recommended models like gemini-2.5-flash or preview models.
- * 
+ *
  * @param log The daily log object containing transport, diet, and energy data.
  * @returns A promise resolving to a GeminiTip containing the advice and estimated carbon savings.
  */
@@ -20,16 +20,16 @@ export async function generateEcoTip(log: {
 }): Promise<GeminiTip> {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
-    console.warn("VITE_GEMINI_API_KEY is not defined. Returning a fallback tip.");
+    console.warn('VITE_GEMINI_API_KEY is not defined. Returning a fallback tip.');
     return {
-      tip: "Consider walking or biking for distances under 3km to easily save carbon emissions.",
-      estimatedSavingsKg: 0.8
+      tip: 'Consider walking or biking for distances under 3km to easily save carbon emissions.',
+      estimatedSavingsKg: 0.8,
     };
   }
 
   try {
     const ai = new GoogleGenAI({ apiKey });
-    
+
     // System instruction enforces structured JSON output.
     const systemInstruction = `
       You are an expert environmental science AI assistant.
@@ -57,38 +57,40 @@ export async function generateEcoTip(log: {
       config: {
         systemInstruction,
         responseMimeType: 'application/json',
-      }
+      },
     });
 
     const responseText = response.text || '';
     const parsedTip = JSON.parse(responseText.trim()) as GeminiTip;
-    
+
     return {
-      tip: parsedTip.tip || "Try to use natural sunlight instead of artificial lighting today.",
-      estimatedSavingsKg: typeof parsedTip.estimatedSavingsKg === 'number' ? parsedTip.estimatedSavingsKg : 0.5
+      tip: parsedTip.tip || 'Try to use natural sunlight instead of artificial lighting today.',
+      estimatedSavingsKg:
+        typeof parsedTip.estimatedSavingsKg === 'number' ? parsedTip.estimatedSavingsKg : 0.5,
     };
   } catch (error) {
-    console.error("Error generating Gemini tip, falling back to gemini-1.5-flash:", error);
+    console.error('Error generating Gemini tip, falling back to gemini-1.5-flash:', error);
     try {
       // Fallback model query
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: 'gemini-1.5-flash',
-        contents: 'Provide my daily personalized eco-friendly tip in JSON format with "tip" and "estimatedSavingsKg".',
+        contents:
+          'Provide my daily personalized eco-friendly tip in JSON format with "tip" and "estimatedSavingsKg".',
         config: {
           responseMimeType: 'application/json',
-        }
+        },
       });
       const parsedTip = JSON.parse(response.text || '{}') as GeminiTip;
       return {
-        tip: parsedTip.tip || "Try switching off unused lights and electrical appliances.",
-        estimatedSavingsKg: parsedTip.estimatedSavingsKg || 0.5
+        tip: parsedTip.tip || 'Try switching off unused lights and electrical appliances.',
+        estimatedSavingsKg: parsedTip.estimatedSavingsKg || 0.5,
       };
     } catch (fallbackError) {
-      console.error("Fallback failed:", fallbackError);
+      console.error('Fallback failed:', fallbackError);
       return {
-        tip: "Try switching off unused lights and electrical appliances to save grid power.",
-        estimatedSavingsKg: 0.5
+        tip: 'Try switching off unused lights and electrical appliances to save grid power.',
+        estimatedSavingsKg: 0.5,
       };
     }
   }

@@ -23,26 +23,28 @@ export const Leaderboard: React.FC = () => {
         const colRef = collection(db, 'leaderboard');
         const q = query(colRef, orderBy('totalPoints', 'desc'), limit(10));
         const querySnapshot = await getDocs(q);
-        
+
         const dbUsers: LeaderboardUser[] = [];
         querySnapshot.forEach((doc) => {
           dbUsers.push({
             uid: doc.id,
-            ...doc.data()
+            ...doc.data(),
           } as LeaderboardUser);
         });
 
-        const currentLiveUser: LeaderboardUser | null = userProfile ? {
-          uid: user?.uid || 'current',
-          displayName: userProfile.displayName || 'You',
-          totalPoints: userProfile.totalPoints || 0,
-          isCurrentUser: true,
-        } : null;
+        const currentLiveUser: LeaderboardUser | null = userProfile
+          ? {
+              uid: user?.uid || 'current',
+              displayName: userProfile.displayName || 'You',
+              totalPoints: userProfile.totalPoints || 0,
+              isCurrentUser: true,
+            }
+          : null;
 
         const mergedList = [...dbUsers];
 
         // Add current user if not already present in the Firestore rankings
-        if (currentLiveUser && !mergedList.some(u => u.uid === currentLiveUser.uid)) {
+        if (currentLiveUser && !mergedList.some((u) => u.uid === currentLiveUser.uid)) {
           mergedList.push(currentLiveUser);
         }
 
@@ -50,14 +52,16 @@ export const Leaderboard: React.FC = () => {
         mergedList.sort((a, b) => b.totalPoints - a.totalPoints);
         setLeaderboard(mergedList);
       } catch (error) {
-        console.error("Error reading leaderboard (could be due to strict rules):", error);
+        console.error('Error reading leaderboard (could be due to strict rules):', error);
         // Fallback to show only current user on query failure
-        const currentLiveUser: LeaderboardUser | null = userProfile ? {
-          uid: user?.uid || 'current',
-          displayName: userProfile.displayName || 'You (Local)',
-          totalPoints: userProfile.totalPoints || 0,
-          isCurrentUser: true,
-        } : null;
+        const currentLiveUser: LeaderboardUser | null = userProfile
+          ? {
+              uid: user?.uid || 'current',
+              displayName: userProfile.displayName || 'You (Local)',
+              totalPoints: userProfile.totalPoints || 0,
+              isCurrentUser: true,
+            }
+          : null;
         const mergedList = currentLiveUser ? [currentLiveUser] : [];
         setLeaderboard(mergedList);
       } finally {
@@ -69,7 +73,11 @@ export const Leaderboard: React.FC = () => {
   }, [userProfile, user]);
 
   return (
-    <main id="main-content" className="flex-1 p-6 md:p-10 max-w-4xl mx-auto w-full text-left" tabIndex={-1}>
+    <main
+      id="main-content"
+      className="flex-1 p-6 md:p-10 max-w-4xl mx-auto w-full text-left"
+      tabIndex={-1}
+    >
       <header className="mb-8">
         <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center space-x-3">
           <Trophy className="w-9 h-9 text-amber-400" />
@@ -84,7 +92,9 @@ export const Leaderboard: React.FC = () => {
       <div className="mb-6 p-4 bg-slate-900/50 border border-slate-800 rounded-xl flex items-start space-x-3">
         <ShieldAlert className="w-5 h-5 text-indigo-400 mt-0.5 flex-shrink-0" />
         <p className="text-xs text-gray-400 leading-relaxed">
-          <strong>Security Protocol Enforced:</strong> The leaderboard collection is strictly read-only for client connections. Leaderboard ranks are dynamically generated safely to block client-side score modification.
+          <strong>Security Protocol Enforced:</strong> The leaderboard collection is strictly
+          read-only for client connections. Leaderboard ranks are dynamically generated safely to
+          block client-side score modification.
         </p>
       </div>
 
@@ -99,16 +109,20 @@ export const Leaderboard: React.FC = () => {
             {leaderboard.map((item, index) => {
               const rank = index + 1;
               const isPodium = rank <= 3;
-              const podiumColors = 
-                rank === 1 ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
-                rank === 2 ? 'text-slate-300 bg-slate-400/10 border-slate-400/30' :
-                'text-amber-600 bg-amber-700/10 border-amber-700/30';
+              const podiumColors =
+                rank === 1
+                  ? 'text-amber-400 bg-amber-500/10 border-amber-500/30'
+                  : rank === 2
+                    ? 'text-slate-300 bg-slate-400/10 border-slate-400/30'
+                    : 'text-amber-600 bg-amber-700/10 border-amber-700/30';
 
               return (
                 <div
                   key={`${item.uid || 'competitor'}-${index}`}
                   className={`flex items-center justify-between p-4 md:p-6 transition duration-150 ${
-                    item.isCurrentUser ? 'bg-primary/5 border-l-4 border-l-primary' : 'hover:bg-slate-900/30'
+                    item.isCurrentUser
+                      ? 'bg-primary/5 border-l-4 border-l-primary'
+                      : 'hover:bg-slate-900/30'
                   }`}
                 >
                   <div className="flex items-center space-x-4">
@@ -140,8 +154,12 @@ export const Leaderboard: React.FC = () => {
                   </div>
 
                   <div className="text-right">
-                    <span className="block text-lg font-extrabold text-white">{item.totalPoints}</span>
-                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Points</span>
+                    <span className="block text-lg font-extrabold text-white">
+                      {item.totalPoints}
+                    </span>
+                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">
+                      Points
+                    </span>
                   </div>
                 </div>
               );

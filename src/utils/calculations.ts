@@ -5,16 +5,16 @@ export const TRANSPORT_EMISSIONS: Record<string, number> = {
   'petrol-car': 0.18,
   'diesel-car': 0.16,
   'electric-car': 0.05,
-  'bus': 0.08,
-  'train': 0.04,
-  'bicycle': 0,
-  'walking': 0,
+  bus: 0.08,
+  train: 0.04,
+  bicycle: 0,
+  walking: 0,
 };
 
 /**
  * Standard baseline transport emissions (e.g., standard petrol car) in kg per km.
  */
-export const TRANSPORT_BASELINE_FACTOR = 0.20;
+export const TRANSPORT_BASELINE_FACTOR = 0.2;
 
 /**
  * Options for diet types and their daily CO2 emission factors in kg.
@@ -22,8 +22,8 @@ export const TRANSPORT_BASELINE_FACTOR = 0.20;
 export const DIET_EMISSIONS: Record<string, number> = {
   'heavy-meat': 2.5,
   'low-meat': 1.7,
-  'vegetarian': 1.3,
-  'vegan': 0.9,
+  vegetarian: 1.3,
+  vegan: 0.9,
 };
 
 /**
@@ -54,7 +54,7 @@ export interface DailyLogInput {
 /**
  * Calculates the amount of carbon saved in kilograms based on user choices
  * compared to standard baselines.
- * 
+ *
  * @param input The daily logs submitted by the user
  * @returns The calculated carbon saved in kg, rounded to two decimal places
  */
@@ -74,13 +74,13 @@ export function calculateCarbonSaved(input: DailyLogInput): number {
 
   // Total carbon saved. Make sure we don't go below 0 (though users can save or not save).
   const totalSaved = transportSaved + dietSaved + energySaved;
-  
+
   return Math.max(0, parseFloat(totalSaved.toFixed(2)));
 }
 
 /**
  * Determines the updated streak and points based on user's last logged date.
- * 
+ *
  * @param lastLoggedDate User's last logged date in YYYY-MM-DD format
  * @param currentDate Current date in YYYY-MM-DD format
  * @param currentStreak User's current streak count
@@ -93,7 +93,7 @@ export function calculateStreakAndPoints(
   currentDate: string,
   currentStreak: number,
   highestStreak: number,
-  carbonSaved: number
+  carbonSaved: number,
 ): {
   newStreak: number;
   newHighestStreak: number;
@@ -135,7 +135,7 @@ export function calculateStreakAndPoints(
   }
 
   const newHighestStreak = Math.max(highestStreak, newStreak);
-  
+
   // Calculate points: 10 per kg CO2 saved + streak bonus (10 * currentStreak)
   const basePoints = Math.round(carbonSaved * 10);
   const streakBonus = newStreak * 5;

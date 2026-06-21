@@ -8,7 +8,7 @@ interface EventInput {
 /**
  * Service to sync carbon saving tips to the user's Google Calendar.
  * Schedules the action challenge for tomorrow morning.
- * 
+ *
  * @param eventData The custom challenge tip and savings to add
  * @returns A promise resolving to the created event link
  */
@@ -43,7 +43,7 @@ export async function scheduleCalendarEvent(eventData: EventInput): Promise<stri
     {
       method: 'POST',
       body: JSON.stringify(event),
-    }
+    },
   );
 
   const data = await response.json();

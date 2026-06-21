@@ -17,51 +17,55 @@ vi.mock('firebase/firestore', () => ({
   query: vi.fn().mockImplementation(() => ({})),
   orderBy: vi.fn().mockImplementation(() => ({})),
   limit: vi.fn().mockImplementation(() => ({})),
-  getDocs: vi.fn().mockImplementation(() => Promise.resolve({
-    forEach: (cb: (doc: { id: string; data: () => Record<string, unknown> }) => void) => {
-      // Competitor 1 / Log 1
-      cb({
-        id: 'mock1',
-        data: () => ({
-          timestamp: new Date().toISOString(),
-          transportKms: 10,
-          transportType: 'petrol-car',
-          dietType: 'vegan',
-          energyKwh: 10,
-          carbonSavedKg: 2,
-          displayName: 'Sophia Green',
-          totalPoints: 1250,
-        })
-      });
-      // Competitor 2 / Log 2
-      cb({
-        id: 'mock2',
-        data: () => ({
-          timestamp: new Date().toISOString(),
-          transportKms: 20,
-          transportType: 'bicycle',
-          dietType: 'vegan',
-          energyKwh: 8,
-          carbonSavedKg: 7.4,
-          displayName: 'Emma Leaf',
-          totalPoints: 720,
-        })
-      });
-    }
-  })),
+  getDocs: vi.fn().mockImplementation(() =>
+    Promise.resolve({
+      forEach: (cb: (doc: { id: string; data: () => Record<string, unknown> }) => void) => {
+        // Competitor 1 / Log 1
+        cb({
+          id: 'mock1',
+          data: () => ({
+            timestamp: new Date().toISOString(),
+            transportKms: 10,
+            transportType: 'petrol-car',
+            dietType: 'vegan',
+            energyKwh: 10,
+            carbonSavedKg: 2,
+            displayName: 'Sophia Green',
+            totalPoints: 1250,
+          }),
+        });
+        // Competitor 2 / Log 2
+        cb({
+          id: 'mock2',
+          data: () => ({
+            timestamp: new Date().toISOString(),
+            transportKms: 20,
+            transportType: 'bicycle',
+            dietType: 'vegan',
+            energyKwh: 8,
+            carbonSavedKg: 7.4,
+            displayName: 'Emma Leaf',
+            totalPoints: 720,
+          }),
+        });
+      },
+    }),
+  ),
   doc: vi.fn().mockImplementation(() => ({})),
-  getDoc: vi.fn().mockImplementation(() => Promise.resolve({
-    exists: () => true,
-    data: () => ({
-      displayName: 'Test User',
-      email: 'test@example.com',
-      totalPoints: 520,
-      currentStreak: 3,
-      highestStreak: 7,
-      lastLoggedDate: '2026-06-20',
-      unlockedBadges: ['Commute Champion'],
-    })
-  })),
+  getDoc: vi.fn().mockImplementation(() =>
+    Promise.resolve({
+      exists: () => true,
+      data: () => ({
+        displayName: 'Test User',
+        email: 'test@example.com',
+        totalPoints: 520,
+        currentStreak: 3,
+        highestStreak: 7,
+        lastLoggedDate: '2026-06-20',
+        unlockedBadges: ['Commute Champion'],
+      }),
+    }),
+  ),
   setDoc: vi.fn().mockImplementation(() => Promise.resolve()),
   updateDoc: vi.fn().mockImplementation(() => Promise.resolve()),
   runTransaction: vi.fn().mockImplementation(() => Promise.resolve()),
@@ -90,7 +94,9 @@ vi.mock('../context/AuthContext', () => ({
 
 // Mock react-leaflet to prevent JSDOM layout & canvas rendering errors
 vi.mock('react-leaflet', () => ({
-  MapContainer: ({ children }: { children: ReactNode }) => <div data-testid="map-container">{children}</div>,
+  MapContainer: ({ children }: { children: ReactNode }) => (
+    <div data-testid="map-container">{children}</div>
+  ),
   TileLayer: () => <div data-testid="tile-layer" />,
   Marker: () => <div data-testid="marker" />,
   Polyline: () => <div data-testid="polyline" />,
@@ -114,11 +120,10 @@ import Leaderboard from './Leaderboard';
 import Profile from './Profile';
 
 describe('CarbonSense React Components Rendering Tests', () => {
-
   describe('Dashboard Component', () => {
     it('should render welcome greeting and profile stats cards', () => {
       render(<Dashboard />);
-      
+
       // Check greeting header
       expect(screen.getByText(/Welcome back,/i)).toBeDefined();
       expect(screen.getByText(/Test User/i)).toBeDefined();
@@ -139,7 +144,7 @@ describe('CarbonSense React Components Rendering Tests', () => {
   describe('LogForm Component', () => {
     it('should render form section headers and input fields', () => {
       render(<LogForm />);
-      
+
       // Section headers
       expect(screen.getByText(/1. Transport Log & Route Planner/i)).toBeDefined();
       expect(screen.getByText(/2. Nutrition & Household Energy Log/i)).toBeDefined();
@@ -165,7 +170,7 @@ describe('CarbonSense React Components Rendering Tests', () => {
   describe('Leaderboard Component', () => {
     it('should render leaderboard headers and rank items', async () => {
       render(<Leaderboard />);
-      
+
       expect(screen.getByText(/Global Leaderboard/i)).toBeDefined();
       expect(await screen.findByText(/Sophia Green/i)).toBeDefined(); // mock player
       expect(await screen.findByText(/Emma Leaf/i)).toBeDefined(); // mock player
@@ -176,7 +181,7 @@ describe('CarbonSense React Components Rendering Tests', () => {
   describe('Profile Component', () => {
     it('should render profile credentials and streaks', () => {
       render(<Profile />);
-      
+
       expect(screen.getByText(/Your Eco Profile/i)).toBeDefined();
       expect(screen.getByText(/test@example.com/i)).toBeDefined();
       expect(screen.getByText(/Current Streak/i)).toBeDefined();
@@ -185,7 +190,7 @@ describe('CarbonSense React Components Rendering Tests', () => {
 
     it('should render user badges and check Commute Champion unlock status', () => {
       render(<Profile />);
-      
+
       expect(screen.getByText(/Badges & Achievements/i)).toBeDefined();
       expect(screen.getByText(/Commute Champion/i)).toBeDefined();
       // Total points are 520, so unlocked badge count is positive

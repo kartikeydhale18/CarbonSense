@@ -11,13 +11,13 @@ interface DailyLogData {
 
 /**
  * Service to export daily logs subcollection to a new Google Sheet.
- * 
+ *
  * @param logs The array of user daily logs
  * @returns A promise resolving to the created spreadsheet URL
  */
 export async function exportLogsToSheets(logs: DailyLogData[]): Promise<string> {
   if (logs.length === 0) {
-    throw new Error("No logs available to export.");
+    throw new Error('No logs available to export.');
   }
 
   // 1. Create a new Spreadsheet
@@ -32,7 +32,7 @@ export async function exportLogsToSheets(logs: DailyLogData[]): Promise<string> 
     {
       method: 'POST',
       body: JSON.stringify(sheetMeta),
-    }
+    },
   );
 
   const createData = await createRes.json();
@@ -40,7 +40,7 @@ export async function exportLogsToSheets(logs: DailyLogData[]): Promise<string> 
   const spreadsheetUrl = createData.spreadsheetUrl;
 
   if (!spreadsheetId) {
-    throw new Error("Failed to create spreadsheet (spreadsheetId was empty).");
+    throw new Error('Failed to create spreadsheet (spreadsheetId was empty).');
   }
 
   // 2. Prepare grid values
@@ -50,16 +50,16 @@ export async function exportLogsToSheets(logs: DailyLogData[]): Promise<string> 
     'Transport Type',
     'Diet Type',
     'Energy Kwh',
-    'Carbon Saved (kg)'
+    'Carbon Saved (kg)',
   ];
 
-  const rows = logs.map(log => [
+  const rows = logs.map((log) => [
     new Date(log.timestamp).toLocaleString(),
     log.transportKms,
     log.transportType,
     log.dietType,
     log.energyKwh,
-    log.carbonSavedKg
+    log.carbonSavedKg,
   ]);
 
   const valueRange = {
@@ -72,7 +72,7 @@ export async function exportLogsToSheets(logs: DailyLogData[]): Promise<string> 
     {
       method: 'POST',
       body: JSON.stringify(valueRange),
-    }
+    },
   );
 
   return spreadsheetUrl;

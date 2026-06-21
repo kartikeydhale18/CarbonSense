@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  calculateCarbonSaved,
-  calculateStreakAndPoints,
-} from './calculations';
+import { calculateCarbonSaved, calculateStreakAndPoints } from './calculations';
 
 describe('Carbon Saved Calculations', () => {
   it('should calculate zero carbon saved for standard baseline inputs', () => {
