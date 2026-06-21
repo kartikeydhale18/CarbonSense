@@ -56,7 +56,6 @@ export const LogForm: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [carbonPreview, setCarbonPreview] = useState<number | null>(null);
 
   // Haversine formula to compute distance
   const calculateGeodesicDistance = (
@@ -135,6 +134,7 @@ export const LogForm: React.FC = () => {
 
       let milestoneTriggered = false;
       let pointsAdded = 0;
+      let newlyUnlockedBadges: string[] = [];
 
       // Perform a transaction to keep profile stats and log document updates consistent
       await runTransaction(db, async (transaction) => {
@@ -154,14 +154,29 @@ export const LogForm: React.FC = () => {
 
         const newPoints = (profile.totalPoints || 0) + streakData.pointsToAdd;
         const newBadges = [...(profile.unlockedBadges || [])];
+        const existingBadges = profile.unlockedBadges || [];
 
         pointsAdded = streakData.pointsToAdd;
 
-        // Award "Commute Champion" when total points cross 500
+        // 1. Award "Eco Novice" on first log
+        if (!newBadges.includes('Eco Novice')) {
+          newBadges.push('Eco Novice');
+          milestoneTriggered = true;
+        }
+
+        // 2. Award "Streak Warrior" when current streak is >= 3
+        if (streakData.newStreak >= 3 && !newBadges.includes('Streak Warrior')) {
+          newBadges.push('Streak Warrior');
+          milestoneTriggered = true;
+        }
+
+        // 3. Award "Commute Champion" when total points cross 500
         if (newPoints >= 500 && !newBadges.includes('Commute Champion')) {
           newBadges.push('Commute Champion');
           milestoneTriggered = true;
         }
+
+        newlyUnlockedBadges = newBadges.filter((b) => !existingBadges.includes(b));
 
         // 1. Create a log document in the dailyLogs subcollection
         const logsColRef = collection(db, 'users', user.uid, 'dailyLogs');
@@ -189,12 +204,15 @@ export const LogForm: React.FC = () => {
         `Log recorded successfully! You saved ${carbonSaved} kg of CO2 and earned ${pointsAdded} points!`,
       );
 
-      // Always trigger soft confetti, trigger high milestone confetti if unlocked Commute Champion
-      if (milestoneTriggered) {
+      // Always trigger soft confetti, trigger high milestone confetti if unlocked any badges
+      if (milestoneTriggered && newlyUnlockedBadges.length > 0) {
         triggerConfetti();
         // Additional delay confetti for wow effect
         setTimeout(triggerConfetti, 400);
-        setSuccessMsg((prev) => prev + ' 🎉 Milestone unlocked: You are now a Commute Champion!');
+        setSuccessMsg(
+          (prev) =>
+            prev + ` 🎉 Milestone unlocked: You unlocked the ${newlyUnlockedBadges.join(', ')} badge!`,
+        );
       } else {
         confetti({
           particleCount: 50,
@@ -219,16 +237,13 @@ export const LogForm: React.FC = () => {
     }
   };
 
-  // Live preview calculation on input change
-  const handlePreviewCalculation = () => {
-    const preview = calculateCarbonSaved({
-      transportKms,
-      transportType,
-      dietType,
-      energyKwh,
-    });
-    setCarbonPreview(preview);
-  };
+  // Calculate live preview inline during render to prevent state lagging
+  const carbonPreview = calculateCarbonSaved({
+    transportKms,
+    transportType,
+    dietType,
+    energyKwh,
+  });
 
   return (
     <main
@@ -282,10 +297,7 @@ export const LogForm: React.FC = () => {
               <select
                 id="transport-type"
                 value={transportType}
-                onChange={(e) => {
-                  setTransportType(e.target.value);
-                  handlePreviewCalculation();
-                }}
+                onChange={(e) => setTransportType(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="petrol-car">Petrol Car (Standard)</option>
@@ -311,10 +323,7 @@ export const LogForm: React.FC = () => {
                 min="0"
                 step="0.1"
                 value={transportKms}
-                onChange={(e) => {
-                  setTransportKms(parseFloat(e.target.value) || 0);
-                  handlePreviewCalculation();
-                }}
+                onChange={(e) => setTransportKms(parseFloat(e.target.value) || 0)}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
@@ -382,10 +391,7 @@ export const LogForm: React.FC = () => {
               <select
                 id="diet-type"
                 value={dietType}
-                onChange={(e) => {
-                  setDietType(e.target.value);
-                  handlePreviewCalculation();
-                }}
+                onChange={(e) => setDietType(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="heavy-meat">High Meat Consumption</option>
@@ -405,10 +411,7 @@ export const LogForm: React.FC = () => {
                 min="0"
                 step="0.5"
                 value={energyKwh}
-                onChange={(e) => {
-                  setEnergyKwh(parseFloat(e.target.value) || 0);
-                  handlePreviewCalculation();
-                }}
+                onChange={(e) => setEnergyKwh(parseFloat(e.target.value) || 0)}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
@@ -427,10 +430,7 @@ export const LogForm: React.FC = () => {
                 Live Preview Savings
               </span>
               <span className="text-xl font-bold text-white">
-                {carbonPreview !== null
-                  ? carbonPreview
-                  : calculateCarbonSaved({ transportKms, transportType, dietType, energyKwh })}{' '}
-                kg CO2
+                {carbonPreview} kg CO2
               </span>
             </div>
           </div>

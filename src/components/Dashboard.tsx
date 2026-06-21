@@ -6,6 +6,14 @@ import { Chart } from 'react-google-charts';
 import { generateEcoTip } from '../services/geminiService';
 import type { GeminiTip } from '../services/geminiService';
 import { Leaf, Flame, Award, Calendar, Loader, CheckCircle } from 'lucide-react';
+import {
+  TRANSPORT_EMISSIONS,
+  TRANSPORT_BASELINE_FACTOR,
+  DIET_EMISSIONS,
+  DIET_BASELINE_FACTOR,
+  ENERGY_BASELINE_KWH,
+  ENERGY_EMISSION_FACTOR,
+} from '../utils/calculations';
 
 // Wait, the schedule service is imported from scheduleCalendarEvent. Let's make sure the import is correct:
 // In our file list, we created: src/services/googleCalendarService.ts
@@ -68,7 +76,7 @@ export const Dashboard: React.FC = () => {
     };
 
     fetchLogsAndTip();
-  }, [user]);
+  }, [user?.uid]);
 
   const handleSyncToCalendar = async () => {
     if (!geminiTip) return;
@@ -97,32 +105,16 @@ export const Dashboard: React.FC = () => {
     // Standard baselines vs choices to visualize what savings come from where
     logs.forEach((log) => {
       // transport
-      const transportFactor =
-        log.transportType === 'bicycle' || log.transportType === 'walking'
-          ? 0
-          : log.transportType === 'electric-car'
-            ? 0.05
-            : log.transportType === 'bus'
-              ? 0.08
-              : log.transportType === 'train'
-                ? 0.04
-                : 0.18;
-      const transportSaved = (0.2 - transportFactor) * log.transportKms;
+      const transportFactor = TRANSPORT_EMISSIONS[log.transportType] ?? TRANSPORT_BASELINE_FACTOR;
+      const transportSaved = (TRANSPORT_BASELINE_FACTOR - transportFactor) * log.transportKms;
       transportTotal += Math.max(0, transportSaved);
 
       // diet
-      const dietFactor =
-        log.dietType === 'vegan'
-          ? 0.9
-          : log.dietType === 'vegetarian'
-            ? 1.3
-            : log.dietType === 'low-meat'
-              ? 1.7
-              : 2.5;
-      dietTotal += Math.max(0, 2.5 - dietFactor);
+      const dietFactor = DIET_EMISSIONS[log.dietType] ?? DIET_BASELINE_FACTOR;
+      dietTotal += Math.max(0, DIET_BASELINE_FACTOR - dietFactor);
 
       // energy
-      energyTotal += Math.max(0, (12 - log.energyKwh) * 0.45);
+      energyTotal += Math.max(0, (ENERGY_BASELINE_KWH - log.energyKwh) * ENERGY_EMISSION_FACTOR);
     });
 
     return [

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 
 // --- Mocks ---
@@ -71,25 +71,38 @@ vi.mock('firebase/firestore', () => ({
   runTransaction: vi.fn().mockImplementation(() => Promise.resolve()),
 }));
 
-// Mock Auth Context
+// Mock Auth Context Data
+const mockUser = { uid: 'test-uid', displayName: 'Test User', email: 'test@example.com' };
+const mockUserProfile = {
+  displayName: 'Test User',
+  email: 'test@example.com',
+  totalPoints: 520,
+  currentStreak: 3,
+  highestStreak: 7,
+  lastLoggedDate: '2026-06-20',
+  unlockedBadges: ['Commute Champion', 'Eco Novice'],
+};
+
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({
-    user: { uid: 'test-uid', displayName: 'Test User', email: 'test@example.com' },
-    userProfile: {
-      displayName: 'Test User',
-      email: 'test@example.com',
-      totalPoints: 520,
-      currentStreak: 3,
-      highestStreak: 7,
-      lastLoggedDate: '2026-06-20',
-      unlockedBadges: ['Commute Champion', 'Eco Novice'],
-    },
+    user: mockUser,
+    userProfile: mockUserProfile,
     loading: false,
     login: vi.fn(),
     logout: vi.fn(),
     refreshProfile: vi.fn(),
   }),
   AuthProvider: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}));
+
+// Mock Gemini Service to avoid live API network calls during tests
+vi.mock('../services/geminiService', () => ({
+  generateEcoTip: vi.fn().mockImplementation(() =>
+    Promise.resolve({
+      tip: 'Mock Tip: Walk or bicycle to save carbon!',
+      estimatedSavingsKg: 1.0,
+    }),
+  ),
 }));
 
 // Mock react-leaflet to prevent JSDOM layout & canvas rendering errors
@@ -121,8 +134,11 @@ import Profile from './Profile';
 
 describe('CarbonSense React Components Rendering Tests', () => {
   describe('Dashboard Component', () => {
-    it('should render welcome greeting and profile stats cards', () => {
+    it('should render welcome greeting and profile stats cards', async () => {
       render(<Dashboard />);
+
+      // Wait for logs and tip query resolving to settle state updates
+      await screen.findByText('Mock Chart');
 
       // Check greeting header
       expect(screen.getByText(/Welcome back,/i)).toBeDefined();
@@ -135,8 +151,9 @@ describe('CarbonSense React Components Rendering Tests', () => {
       expect(screen.getByText(/3/i)).toBeDefined(); // streak
     });
 
-    it('should render Google Chart placeholder or visualization container', () => {
+    it('should render Google Chart placeholder or visualization container', async () => {
       render(<Dashboard />);
+      await screen.findByText('Mock Chart');
       expect(screen.getByText(/Historical Emission Savings/i)).toBeDefined();
     });
   });
@@ -179,20 +196,33 @@ describe('CarbonSense React Components Rendering Tests', () => {
   });
 
   describe('Profile Component', () => {
-    it('should render profile credentials and streaks', () => {
+    it('should render profile credentials and streaks', async () => {
       render(<Profile />);
 
       expect(screen.getByText(/Your Eco Profile/i)).toBeDefined();
       expect(screen.getByText(/test@example.com/i)).toBeDefined();
       expect(screen.getByText(/Current Streak/i)).toBeDefined();
       expect(screen.getByText(/Highest Streak/i)).toBeDefined();
+
+      // Wait for async logs fetching to finish (enabling the export button)
+      await waitFor(() => {
+        const btn = screen.getByRole('button', { name: /Export carbon logs/i });
+        expect((btn as HTMLButtonElement).disabled).toBe(false);
+      });
     });
 
-    it('should render user badges and check Commute Champion unlock status', () => {
+    it('should render user badges and check Commute Champion unlock status', async () => {
       render(<Profile />);
 
       expect(screen.getByText(/Badges & Achievements/i)).toBeDefined();
       expect(screen.getByText(/Commute Champion/i)).toBeDefined();
+
+      // Wait for async logs fetching to finish (enabling the export button)
+      await waitFor(() => {
+        const btn = screen.getByRole('button', { name: /Export carbon logs/i });
+        expect((btn as HTMLButtonElement).disabled).toBe(false);
+      });
+
       // Total points are 520, so unlocked badge count is positive
       expect(screen.getAllByText(/Unlocked/i).length).toBeGreaterThan(0);
     });

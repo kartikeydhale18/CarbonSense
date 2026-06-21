@@ -54,7 +54,7 @@ export const Profile: React.FC = () => {
     };
 
     fetchLogs();
-  }, [user]);
+  }, [user?.uid]);
 
   const handleExport = async () => {
     if (logs.length === 0) {
@@ -217,15 +217,16 @@ export const Profile: React.FC = () => {
 
           <div className="space-y-6">
             {badgeMetadata.map((badge) => {
-              // Determine if badge is unlocked
+              // Determine if badge is unlocked (persisted in DB or meets rules dynamically)
               const isUnlocked =
-                badge.id === 'Commute Champion'
+                userProfile?.unlockedBadges?.includes(badge.id) ||
+                (badge.id === 'Commute Champion'
                   ? (userProfile?.totalPoints || 0) >= 500
                   : badge.id === 'Eco Novice'
                     ? logs.length > 0
                     : badge.id === 'Streak Warrior'
                       ? (userProfile?.highestStreak || 0) >= 3
-                      : false;
+                      : false);
 
               return (
                 <div
