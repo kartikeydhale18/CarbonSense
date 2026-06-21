@@ -52,22 +52,7 @@ npm install
 ```
 
 ### 3. Environment Setup
-Create a `.env` file in the root folder (use `.env.example` as a template) and add your project configurations:
-```ini
-# Firebase Config
-VITE_FIREBASE_API_KEY=your_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-
-# Gemini API Key
-VITE_GEMINI_API_KEY=your_google_ai_studio_api_key
-
-# Google OAuth (for sheets and calendar sync)
-VITE_GOOGLE_CLIENT_ID=your_oauth_client_id.apps.googleusercontent.com
-```
+Configure your local environment variables in a `.env` file in the root directory (refer to `.env.example`).
 
 ### 4. Running Locally
 Run the development server:
